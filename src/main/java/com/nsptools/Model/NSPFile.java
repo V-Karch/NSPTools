@@ -17,6 +17,10 @@ public class NSPFile {
 
     }
 
+    public double getSizeMB() {
+        return this.file.length() / (1024 * 1024);
+    }
+
     public File getFile() {
         return this.file;
     }
