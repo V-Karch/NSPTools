@@ -1,4 +1,4 @@
-package com.nsptools.GUI;
+package com.nsptools.View;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -14,6 +14,7 @@ public class RunGUI extends Application {
     public void start(Stage stage) throws Exception {
         Scene scene = new Scene(new GridPane(), 500, 500);
         stage.setScene(scene);
+        stage.setTitle("NSP Tools");
         stage.show();
     }
 }

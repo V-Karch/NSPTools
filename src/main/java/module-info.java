@@ -6,5 +6,5 @@ module program {
     requires java.desktop;
 
     exports com.nsptools;
-    exports com.nsptools.GUI;
+    exports com.nsptools.View;
 }
