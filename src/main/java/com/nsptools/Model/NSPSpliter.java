@@ -1,14 +1,16 @@
 package com.nsptools.Model;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 public class NSPSpliter {
     private final NSPFile nspfile;
+    private final File outputDir;
 
     public NSPSpliter(String filename) throws FileNotFoundException, IllegalArgumentException {
         this.nspfile = new NSPFile(filename);
@@ -17,6 +19,12 @@ public class NSPSpliter {
             throw new IllegalArgumentException("File " + nspfile.toString()
                     + " was smaller than the required size of 4000 MB. Actual Size: " + nspfile.getSizeMB() + " MB.");
         }
+
+        // Create the output directory
+        this.outputDir = new File(nspfile.getFile().getParent(), "split_output");
+        if (!outputDir.exists()) {
+            outputDir.mkdir();
+        }
     }
 
     private String getNewFileName(int partNumber) {
@@ -24,7 +32,7 @@ public class NSPSpliter {
         int dotIndex = fileName.lastIndexOf('.');
         String baseName = (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
         String extension = (dotIndex == -1) ? "" : fileName.substring(dotIndex);
-        return baseName + "_part_" + partNumber + extension;
+        return new File(outputDir, baseName + "_part_" + partNumber + extension).getPath();
     }
 
     public void split() {
