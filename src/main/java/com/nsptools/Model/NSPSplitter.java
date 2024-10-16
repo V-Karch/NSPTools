@@ -9,25 +9,27 @@ import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 
 /**
- * Handles the splitting of NSP files into smaller parts.
- * This class creates split files in a separate output directory.
- *
+ * Handles the splitting of NSP files into multiple parts.
+ * This class supports progress updates via a listener for both console and GUI integration.
+ * 
  * @author V-Karch
  */
-public class NSPSpliter {
+public class NSPSplitter {
     private final NSPFile nspfile;
     private final File outputDir;
+    private final ProgressListener progressListener;
 
     /**
-     * Constructs an NSPSpliter object with the specified filename.
-     * Verifies that the file meets the minimum size requirement and prepares the output directory.
-     *
-     * @param filename the name of the NSP file to be split
-     * @throws FileNotFoundException if the specified file does not exist or is a directory
-     * @throws IllegalArgumentException if the file size is less than the required size of 4000 MB
+     * Constructs an NSPSplitter object with the specified NSP file and progress listener.
+     * 
+     * @param filename         the name of the NSP file to be split
+     * @param progressListener a listener for progress updates
+     * @throws FileNotFoundException    if the NSP file is not found
+     * @throws IllegalArgumentException if the file size is smaller than the required minimum
      */
-    public NSPSpliter(String filename) throws FileNotFoundException, IllegalArgumentException {
+    public NSPSplitter(String filename, ProgressListener progressListener) throws FileNotFoundException, IllegalArgumentException {
         this.nspfile = new NSPFile(filename);
+        this.progressListener = progressListener;
 
         if (!validateFileSize(nspfile)) {
             throw new IllegalArgumentException("File " + nspfile.toString()
@@ -41,12 +43,6 @@ public class NSPSpliter {
         }
     }
 
-    /**
-     * Generates a new filename for each part of the split file.
-     *
-     * @param partNumber the part number to append to the filename
-     * @return the full path of the new file part
-     */
     private String getNewFileName(int partNumber) {
         String fileName = this.nspfile.getFile().getName();
         int dotIndex = fileName.lastIndexOf('.');
@@ -56,13 +52,14 @@ public class NSPSpliter {
     }
 
     /**
-     * Splits the NSP file into smaller parts, each with a maximum size of 4000 MB.
-     * The split files are written to the output directory.
+     * Splits the NSP file into multiple parts and updates progress through the listener.
      */
     public void split() {
-        long partSize = 4000L * 1024 * 1024; // 4 gigabytes in bytes
+        long partSize = 4000L * 1024 * 1024; // 4 GB in bytes
+        long totalSize = nspfile.getFile().length();
         byte[] buffer = new byte[4 * 1024 * 1024]; // 4 MB buffer size
         int partNumber = 1;
+        long totalBytesRead = 0;
 
         try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(this.nspfile.getFile()))) {
             int bytesRead;
@@ -83,6 +80,13 @@ public class NSPSpliter {
                 // Write the data to the current file part
                 output.write(buffer, 0, bytesRead);
                 bytesWrittenToPart += bytesRead;
+                totalBytesRead += bytesRead;
+
+                // Update progress
+                if (progressListener != null) {
+                    double progress = (double) totalBytesRead / totalSize;
+                    progressListener.onProgressUpdate(progress);
+                }
             }
 
             if (output != null) {
@@ -94,12 +98,6 @@ public class NSPSpliter {
         }
     }
 
-    /**
-     * Validates that the NSP file is larger than 4000 MB.
-     *
-     * @param nspfile the NSP file to validate
-     * @return true if the file size is greater than 4000 MB, false otherwise
-     */
     public static boolean validateFileSize(NSPFile nspfile) {
         return nspfile.getSizeMB() > 4000; // Ensure that the file is larger than 4GB
     }
