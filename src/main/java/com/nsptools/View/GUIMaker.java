@@ -3,6 +3,7 @@ package com.nsptools.View;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import com.nsptools.Model.NSPCombiner;
 import com.nsptools.Model.NSPSplitter;
 
 import javafx.stage.Stage;
@@ -192,6 +193,26 @@ public class GUIMaker {
     public static Button combineButton() {
         Button combineButton = new Button("Combine");
         combineButton.setMaxWidth(Double.MAX_VALUE);
+
+        combineButton.setOnAction(event -> {
+            if (directoryPathLabel.getText().equals("No directory selected.")) {
+                // Create an alert
+                Alert alert = new Alert(AlertType.WARNING);
+                alert.setTitle("Directory Not Selected");
+                alert.setHeaderText(null); // No header text
+                alert.setContentText("Please select a directory to combine before proceeding.");
+
+                alert.showAndWait();
+            } else {
+                try {
+                    NSPCombiner nspcombiner = new NSPCombiner(directoryPathLabel.getText().split(": ")[1], null);
+                    nspcombiner.combine();
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         return combineButton;
     }
 }
