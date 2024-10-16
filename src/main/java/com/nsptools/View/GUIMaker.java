@@ -4,16 +4,31 @@ import java.io.File;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.DirectoryChooser;
 import javafx.scene.control.Button;
-import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.control.Alert.AlertType;
 
-
+/**
+ * The GUIMaker class is responsible for creating the GUI components
+ * for the NSP/XCI file splitting and combining tool.
+ * 
+ * @author V-Karch
+ */
 public class GUIMaker {
+    private static Label filePathLabel;     // Label to show the selected file path
+    private static Label directoryPathLabel; // Label to show the selected directory path
+
+    /**
+     * Creates the main frame of the GUI.
+     * 
+     * @param primaryStage the primary stage for this application
+     * @return a GridPane containing the main interface elements
+     * @author V-Karch
+     */
     public static GridPane mainFrame(Stage primaryStage) {
         GridPane mainFrame = new GridPane();
 
@@ -23,11 +38,27 @@ public class GUIMaker {
 
         // Add selection button for selecting an NSP or XCI File
         mainFrame.add(selectNSPFileButton(primaryStage), 0, 0);
+        // Initialize the label to show the selected file path
+        filePathLabel = new Label("No file selected.");
+        mainFrame.add(filePathLabel, 0, 1); // Add the label to the grid
+
+        // Add selection button for selecting a directory
+        mainFrame.add(selectDirectoryButton(primaryStage), 0, 2);
+        // Initialize the label to show the selected directory path
+        directoryPathLabel = new Label("No directory selected.");
+        mainFrame.add(directoryPathLabel, 0, 3); // Add the label to the grid
 
         // Return the main gridpane frame
         return mainFrame;
     }
 
+    /**
+     * Creates a button for selecting an NSP or XCI file.
+     * 
+     * @param primaryStage the primary stage for this application
+     * @return a Button for selecting NSP/XCI files
+     * @author V-Karch
+     */
     public static Button selectNSPFileButton(Stage primaryStage) {
         Button selectNSPButton = new Button("Select NSP or XCI File for splitting");
 
@@ -37,19 +68,48 @@ public class GUIMaker {
             File selectedFile = fileChooser.showOpenDialog(primaryStage);
 
             if (selectedFile != null) {
-                // Do something with the selected file
-                // For demonstration, we can show an alert with the file path
-                Alert alert = new Alert(AlertType.INFORMATION);
-                alert.setTitle("File Selected");
-                alert.setHeaderText(null);
-                alert.setContentText("Selected file: " + selectedFile.getAbsolutePath());
-                alert.showAndWait();
+                // Update the label with the selected file's path
+                filePathLabel.setText("Selected file: " + selectedFile.getAbsolutePath());
+            } else {
+                filePathLabel.setText("No file selected.");
             }
         });
 
         return selectNSPButton;
     }
 
+    /**
+     * Creates a button for selecting a directory for combining NSP/XCI files.
+     * 
+     * @param primaryStage the primary stage for this application
+     * @return a Button for selecting a directory
+     * @author V-Karch
+     */
+    public static Button selectDirectoryButton(Stage primaryStage) {
+        Button selectDirectoryButton = new Button("Select Directory for Combining");
+
+        // Set action for the button
+        selectDirectoryButton.setOnAction(event -> {
+            DirectoryChooser directoryChooser = selectDirectoryChooser();
+            File selectedDirectory = directoryChooser.showDialog(primaryStage);
+
+            if (selectedDirectory != null) {
+                // Update the label with the selected directory's path
+                directoryPathLabel.setText("Selected directory: " + selectedDirectory.getAbsolutePath());
+            } else {
+                directoryPathLabel.setText("No directory selected.");
+            }
+        });
+
+        return selectDirectoryButton;
+    }
+
+    /**
+     * Configures a FileChooser for selecting NSP/XCI files.
+     * 
+     * @return a FileChooser configured for NSP/XCI files
+     * @author V-Karch
+     */
     public static FileChooser selectNSPChooser() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select NSP or XCI File for Splitting");
@@ -62,5 +122,17 @@ public class GUIMaker {
         );
 
         return fileChooser;
+    }
+
+    /**
+     * Configures a DirectoryChooser for selecting a directory.
+     * 
+     * @return a DirectoryChooser configured for selecting a directory
+     * @author V-Karch
+     */
+    public static DirectoryChooser selectDirectoryChooser() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Select Directory for Combining NSP/XCI Files");
+        return directoryChooser;
     }
 }
