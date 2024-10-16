@@ -3,7 +3,6 @@ package com.nsptools.View;
 import java.io.File;
 import javafx.stage.Stage;
 import javafx.concurrent.Task;
-import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.scene.control.Alert;
@@ -29,6 +28,7 @@ import com.nsptools.Model.GUIProgressListener;
 public class GUIMaker {
     private static Label filePathLabel; // Label to show the selected file path
     private static Label directoryPathLabel; // Label to show the selected directory path
+    private final static String buttonStyle = "-fx-background-color: #c3c4c4, linear-gradient(#d6d6d6 50%, white 100%), radial-gradient(center 50% -40%, radius 200%, #e6e6e6 45%, rgba(230,230,230,0) 50%); -fx-background-radius: 30; -fx-background-insets: 0,1,1; -fx-text-fill: black; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 3, 0.0 , 0 , 1 );";
 
     /**
      * Creates the main frame of the GUI.
@@ -40,6 +40,7 @@ public class GUIMaker {
     public static GridPane mainFrame(Stage primaryStage) {
         GridPane mainFrame = new GridPane();
         mainFrame.setHgap(10);
+        mainFrame.setVgap(10);
 
         // Set up background
         Background background = new Background(new BackgroundFill(Color.GRAY, CornerRadii.EMPTY, null));
@@ -60,7 +61,7 @@ public class GUIMaker {
         mainFrame.add(directoryPathLabel, 1, 1); // Add the label to the grid
 
         ProgressBar progressBar = new ProgressBar(0);
-        progressBar.setPadding(new Insets(10, 0, 0, 0));
+        progressBar.setStyle("-fx-accent: #33FF35");
 
         // Add the split button
         mainFrame.add(splitButton(progressBar), 0, 2);
@@ -85,6 +86,7 @@ public class GUIMaker {
     public static Button selectNSPFileButton(Stage primaryStage) {
         Button selectNSPButton = new Button("Select NSP or XCI File for splitting");
         selectNSPButton.setMaxWidth(Double.MAX_VALUE);
+        selectNSPButton.setStyle(buttonStyle);
 
         // Set action for the button
         selectNSPButton.setOnAction(event -> {
@@ -112,6 +114,7 @@ public class GUIMaker {
     public static Button selectDirectoryButton(Stage primaryStage) {
         Button selectDirectoryButton = new Button("Select Directory for Combining");
         selectDirectoryButton.setMaxWidth(Double.MAX_VALUE);
+        selectDirectoryButton.setStyle(buttonStyle);
 
         // Set action for the button
         selectDirectoryButton.setOnAction(event -> {
@@ -179,6 +182,7 @@ public class GUIMaker {
     public static Button splitButton(ProgressBar progressBar) {
         Button splitButton = new Button("Split");
         splitButton.setMaxWidth(Double.MAX_VALUE);
+        splitButton.setStyle(buttonStyle);
 
         splitButton.setOnAction(event -> {
             if (filePathLabel.getText().equals("No file selected.")) {
@@ -233,6 +237,7 @@ public class GUIMaker {
     public static Button combineButton(ProgressBar progressBar) {
         Button combineButton = new Button("Combine");
         combineButton.setMaxWidth(Double.MAX_VALUE);
+        combineButton.setStyle(buttonStyle);
 
         combineButton.setOnAction(event -> {
             if (directoryPathLabel.getText().equals("No directory selected.")) {

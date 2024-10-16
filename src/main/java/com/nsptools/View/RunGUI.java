@@ -14,7 +14,7 @@ public class RunGUI extends Application {
     public void start(Stage stage) throws Exception {
         GridPane mainFrame = GUIMaker.mainFrame(stage);
 
-        Scene scene = new Scene(mainFrame, 750, 140);
+        Scene scene = new Scene(mainFrame, 750, 170);
         stage.setScene(scene);
         stage.setTitle("NSP Tools");
         stage.show();
