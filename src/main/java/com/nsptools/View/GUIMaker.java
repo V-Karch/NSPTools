@@ -3,6 +3,7 @@ package com.nsptools.View;
 import java.io.File;
 import javafx.stage.Stage;
 import javafx.concurrent.Task;
+import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.scene.control.Alert;
@@ -59,6 +60,7 @@ public class GUIMaker {
         mainFrame.add(directoryPathLabel, 1, 1); // Add the label to the grid
 
         ProgressBar progressBar = new ProgressBar(0);
+        progressBar.setPadding(new Insets(10, 0, 0, 0));
 
         // Add the split button
         mainFrame.add(splitButton(progressBar), 0, 2);
