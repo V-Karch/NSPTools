@@ -31,6 +31,7 @@ public class GUIMaker {
      */
     public static GridPane mainFrame(Stage primaryStage) {
         GridPane mainFrame = new GridPane();
+        mainFrame.setHgap(10);
 
         // Set up background
         Background background = new Background(new BackgroundFill(Color.GRAY, CornerRadii.EMPTY, null));
