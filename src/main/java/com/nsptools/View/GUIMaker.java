@@ -38,15 +38,24 @@ public class GUIMaker {
 
         // Add selection button for selecting an NSP or XCI File
         mainFrame.add(selectNSPFileButton(primaryStage), 0, 0);
+
         // Initialize the label to show the selected file path
         filePathLabel = new Label("No file selected.");
-        mainFrame.add(filePathLabel, 0, 1); // Add the label to the grid
+        mainFrame.add(filePathLabel, 1, 0); // Add the label to the grid
 
         // Add selection button for selecting a directory
-        mainFrame.add(selectDirectoryButton(primaryStage), 0, 2);
+        mainFrame.add(selectDirectoryButton(primaryStage), 0, 1);
+
         // Initialize the label to show the selected directory path
         directoryPathLabel = new Label("No directory selected.");
-        mainFrame.add(directoryPathLabel, 0, 3); // Add the label to the grid
+        mainFrame.add(directoryPathLabel, 1, 1); // Add the label to the grid
+
+        // Add the split button
+        mainFrame.add(splitButton(), 0, 2);
+
+        // Add the combine button
+        mainFrame.add(combineButton(), 0, 3);
+
 
         // Return the main gridpane frame
         return mainFrame;
@@ -134,5 +143,15 @@ public class GUIMaker {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Select Directory for Combining NSP/XCI Files");
         return directoryChooser;
+    }
+
+    public static Button splitButton() {
+        Button splitButton = new Button("Split");
+        return splitButton;
+    }
+
+    public static Button combineButton() {
+        Button combineButton = new Button("Combine");
+        return combineButton;
     }
 }
