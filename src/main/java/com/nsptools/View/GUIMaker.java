@@ -1,16 +1,23 @@
 package com.nsptools.View;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+
+import com.nsptools.Model.NSPSplitter;
+
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
-import javafx.stage.DirectoryChooser;
-import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
+import javafx.stage.DirectoryChooser;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.control.Alert.AlertType;
+
 
 /**
  * The GUIMaker class is responsible for creating the GUI components
@@ -148,9 +155,37 @@ public class GUIMaker {
         return directoryChooser;
     }
 
+    /**
+     * Creates a button that triggers the split action.
+     * 
+     * @return a Button configured for splitting an NSP file
+     * @author V-Karch
+     */
     public static Button splitButton() {
         Button splitButton = new Button("Split");
         splitButton.setMaxWidth(Double.MAX_VALUE);
+    
+        splitButton.setOnAction(event -> {
+            // Check if the file path is set
+            if (filePathLabel.getText().equals("No file selected.")) {
+                // Create an alert
+                Alert alert = new Alert(AlertType.WARNING);
+                alert.setTitle("File Not Selected");
+                alert.setHeaderText(null); // No header text
+                alert.setContentText("Please select a file to split before proceeding.");
+    
+                // Show the alert and wait for the user to respond
+                alert.showAndWait();
+            } else {
+                try {
+                    NSPSplitter nspsplitter = new NSPSplitter(filePathLabel.getText().split(": ")[1], null);
+                    nspsplitter.split();
+                } catch (FileNotFoundException | IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    
         return splitButton;
     }
 
