@@ -70,6 +70,7 @@ public class GUIMaker {
      */
     public static Button selectNSPFileButton(Stage primaryStage) {
         Button selectNSPButton = new Button("Select NSP or XCI File for splitting");
+        selectNSPButton.setMaxWidth(Double.MAX_VALUE);
 
         // Set action for the button
         selectNSPButton.setOnAction(event -> {
@@ -96,6 +97,7 @@ public class GUIMaker {
      */
     public static Button selectDirectoryButton(Stage primaryStage) {
         Button selectDirectoryButton = new Button("Select Directory for Combining");
+        selectDirectoryButton.setMaxWidth(Double.MAX_VALUE);
 
         // Set action for the button
         selectDirectoryButton.setOnAction(event -> {
@@ -147,11 +149,13 @@ public class GUIMaker {
 
     public static Button splitButton() {
         Button splitButton = new Button("Split");
+        splitButton.setMaxWidth(Double.MAX_VALUE);
         return splitButton;
     }
 
     public static Button combineButton() {
         Button combineButton = new Button("Combine");
+        combineButton.setMaxWidth(Double.MAX_VALUE);
         return combineButton;
     }
 }
