@@ -11,25 +11,27 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 
 /**
- * Handles the combination of NSP file parts into a single output file.
- * This class searches for split files in a specified directory and combines them into a complete NSP or XCI file.
- *
+ * Handles the combining of NSP file parts into a single file.
+ * This class supports progress updates via a listener for both console and GUI integration.
+ * 
  * @author V-Karch
  */
 public class NSPCombiner {
     private final File inputDir;
     private final List<File> partFiles;
     private final String outputFileName;
+    private final ProgressListener progressListener;
 
     /**
-     * Constructs an NSPCombiner object with the specified directory path.
-     * Verifies that the directory contains valid part files to be combined.
-     *
-     * @param directoryPath the path to the directory containing the split files
-     * @throws IllegalArgumentException if the directory is invalid or contains no valid part files
+     * Constructs an NSPCombiner object with the specified input directory and progress listener.
+     * 
+     * @param directoryPath    the path to the directory containing the NSP file parts
+     * @param progressListener a listener for progress updates
+     * @throws IllegalArgumentException if the directory is invalid or contains no part files
      */
-    public NSPCombiner(String directoryPath) throws IllegalArgumentException {
+    public NSPCombiner(String directoryPath, ProgressListener progressListener) throws IllegalArgumentException {
         this.inputDir = new File(directoryPath);
+        this.progressListener = progressListener;
 
         if (!inputDir.isDirectory()) {
             throw new IllegalArgumentException("The provided path is not a valid directory: " + directoryPath);
@@ -44,11 +46,6 @@ public class NSPCombiner {
         this.outputFileName = determineOutputFileName();
     }
 
-    /**
-     * Finds and sorts all valid part files in the specified directory.
-     *
-     * @return a list of valid part files sorted in the correct order
-     */
     private List<File> findPartFiles() {
         File[] files = inputDir.listFiles();
         List<File> validFiles = new ArrayList<>();
@@ -67,13 +64,6 @@ public class NSPCombiner {
         return validFiles;
     }
 
-    /**
-     * Extracts the part number from the file name to determine its order.
-     *
-     * @param file the file from which to extract the part number
-     * @return the part number as an integer
-     * @throws IllegalArgumentException if the file name format is unexpected
-     */
     private int extractPartNumber(File file) {
         String fileName = file.getName().toLowerCase();
         String partNumberStr;
@@ -90,21 +80,18 @@ public class NSPCombiner {
         return Integer.parseInt(partNumberStr);
     }
 
-    /**
-     * Determines the name of the combined output file based on the file extension of the parts.
-     *
-     * @return the name of the output file with the appropriate extension
-     */
     private String determineOutputFileName() {
         String extension = partFiles.get(0).getName().endsWith(".xci") ? "xci" : "nsp";
         return new File(inputDir, "output." + extension).getPath();
     }
 
     /**
-     * Combines all the valid part files into a single output file.
-     * The combined file is created in the same directory as the part files.
+     * Combines the NSP file parts into a single file and updates progress through the listener.
      */
     public void combine() {
+        long totalSize = partFiles.stream().mapToLong(File::length).sum();
+        long totalBytesRead = 0;
+
         try (BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputFileName))) {
             for (File partFile : partFiles) {
                 try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(partFile))) {
@@ -112,6 +99,13 @@ public class NSPCombiner {
                     int bytesRead;
                     while ((bytesRead = input.read(buffer)) > 0) {
                         output.write(buffer, 0, bytesRead);
+                        totalBytesRead += bytesRead;
+
+                        // Update progress
+                        if (progressListener != null) {
+                            double progress = (double) totalBytesRead / totalSize;
+                            progressListener.onProgressUpdate(progress);
+                        }
                     }
                 }
             }
