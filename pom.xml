@@ -7,8 +7,8 @@
     <version>1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>19</maven.compiler.source>
-        <maven.compiler.target>19</maven.compiler.target>
+        <maven.compiler.source>23</maven.compiler.source>
+        <maven.compiler.target>23</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -32,7 +32,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>default-cli</id>
@@ -40,7 +40,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>program.Main</mainClass>
+                            <mainClass>com.nsptools.program.Main</mainClass>
                         </configuration>
                     </execution>
                 </executions>
