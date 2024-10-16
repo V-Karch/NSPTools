@@ -11,7 +11,7 @@ public class RunGUI extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Scene scene = new Scene(GUIMaker.mainFrame(), 500, 500);
+        Scene scene = new Scene(GUIMaker.mainFrame(stage), 500, 500);
         stage.setScene(scene);
         stage.setTitle("NSP Tools");
         stage.show();
