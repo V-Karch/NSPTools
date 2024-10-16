@@ -1,12 +1,8 @@
 package com.nsptools.View;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-
-import com.nsptools.Model.NSPCombiner;
-import com.nsptools.Model.NSPSplitter;
-
 import javafx.stage.Stage;
+import javafx.concurrent.Task;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.scene.control.Alert;
@@ -14,11 +10,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
+import com.nsptools.Model.NSPCombiner;
+import com.nsptools.Model.NSPSplitter;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.control.Alert.AlertType;
-
+import com.nsptools.Model.GUIProgressListener;
 
 /**
  * The GUIMaker class is responsible for creating the GUI components
@@ -27,7 +26,7 @@ import javafx.scene.control.Alert.AlertType;
  * @author V-Karch
  */
 public class GUIMaker {
-    private static Label filePathLabel;     // Label to show the selected file path
+    private static Label filePathLabel; // Label to show the selected file path
     private static Label directoryPathLabel; // Label to show the selected directory path
 
     /**
@@ -59,12 +58,16 @@ public class GUIMaker {
         directoryPathLabel = new Label("No directory selected.");
         mainFrame.add(directoryPathLabel, 1, 1); // Add the label to the grid
 
+        ProgressBar progressBar = new ProgressBar(0);
+
         // Add the split button
-        mainFrame.add(splitButton(), 0, 2);
+        mainFrame.add(splitButton(progressBar), 0, 2);
 
         // Add the combine button
-        mainFrame.add(combineButton(), 0, 3);
+        mainFrame.add(combineButton(progressBar), 0, 3);
 
+        progressBar.setMaxWidth(Double.MAX_VALUE);
+        mainFrame.add(progressBar, 0, 4, 2, 1); // Span across two columns
 
         // Return the main gridpane frame
         return mainFrame;
@@ -133,13 +136,12 @@ public class GUIMaker {
     public static FileChooser selectNSPChooser() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select NSP or XCI File for Splitting");
-        
+
         // Add extension filters for NSP and XCI files
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("NSP Files", "*.nsp"),
-            new FileChooser.ExtensionFilter("XCI Files", "*.xci"),
-            new FileChooser.ExtensionFilter("All Supported Files", "*.nsp", "*.xci")
-        );
+                new FileChooser.ExtensionFilter("NSP Files", "*.nsp"),
+                new FileChooser.ExtensionFilter("XCI Files", "*.xci"),
+                new FileChooser.ExtensionFilter("All Supported Files", "*.nsp", "*.xci"));
 
         return fileChooser;
     }
@@ -157,59 +159,123 @@ public class GUIMaker {
     }
 
     /**
+     * Resets the progress bar to its initial state (0%).
+     * 
+     * @param progressBar the ProgressBar to reset
+     * @author V-Karch
+     */
+    private static void resetProgressBar(ProgressBar progressBar) {
+        progressBar.setProgress(0); // Set progress to 0%
+    }
+
+    /**
      * Creates a button that triggers the split action.
      * 
      * @return a Button configured for splitting an NSP file
      * @author V-Karch
      */
-    public static Button splitButton() {
+    public static Button splitButton(ProgressBar progressBar) {
         Button splitButton = new Button("Split");
         splitButton.setMaxWidth(Double.MAX_VALUE);
-    
+
         splitButton.setOnAction(event -> {
-            // Check if the file path is set
             if (filePathLabel.getText().equals("No file selected.")) {
-                // Create an alert
                 Alert alert = new Alert(AlertType.WARNING);
                 alert.setTitle("File Not Selected");
-                alert.setHeaderText(null); // No header text
+                alert.setHeaderText(null);
                 alert.setContentText("Please select a file to split before proceeding.");
-    
-                // Show the alert and wait for the user to respond
                 alert.showAndWait();
             } else {
-                try {
-                    NSPSplitter nspsplitter = new NSPSplitter(filePathLabel.getText().split(": ")[1], null);
-                    nspsplitter.split();
-                } catch (FileNotFoundException | IllegalArgumentException e) {
-                    e.printStackTrace();
-                }
+                resetProgressBar(progressBar); // Reset progress bar
+
+                // Create a new Task for splitting
+                Task<Void> splitTask = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        NSPSplitter nspsplitter = new NSPSplitter(filePathLabel.getText().split(": ")[1],
+                                new GUIProgressListener(progressBar));
+                        nspsplitter.split(); // Run the splitting process
+                        return null;
+                    }
+
+                    @Override
+                    protected void succeeded() {
+                        progressBar.setProgress(1.0); // Set progress to 100% when done
+                        Alert alert = new Alert(AlertType.INFORMATION);
+                        alert.setTitle("Success");
+                        alert.setHeaderText(null);
+                        alert.setContentText("File splitting completed.");
+                        alert.showAndWait();
+                    }
+
+                    @Override
+                    protected void failed() {
+                        Throwable exception = getException();
+                        // Handle failure
+                        Alert alert = new Alert(AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("File splitting failed");
+                        alert.setContentText(exception.getMessage());
+                        alert.showAndWait();
+                    }
+                };
+
+                // Run the task in a new thread
+                new Thread(splitTask).start();
             }
         });
-    
+
         return splitButton;
     }
 
-    public static Button combineButton() {
+    public static Button combineButton(ProgressBar progressBar) {
         Button combineButton = new Button("Combine");
         combineButton.setMaxWidth(Double.MAX_VALUE);
 
         combineButton.setOnAction(event -> {
             if (directoryPathLabel.getText().equals("No directory selected.")) {
-                // Create an alert
                 Alert alert = new Alert(AlertType.WARNING);
                 alert.setTitle("Directory Not Selected");
-                alert.setHeaderText(null); // No header text
+                alert.setHeaderText(null);
                 alert.setContentText("Please select a directory to combine before proceeding.");
-
                 alert.showAndWait();
             } else {
-                try {
-                    NSPCombiner nspcombiner = new NSPCombiner(directoryPathLabel.getText().split(": ")[1], null);
-                    nspcombiner.combine();
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                }
+                resetProgressBar(progressBar); // Reset progress bar
+
+                // Create a new Task for combining
+                Task<Void> combineTask = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        NSPCombiner nspcombiner = new NSPCombiner(directoryPathLabel.getText().split(": ")[1],
+                                new GUIProgressListener(progressBar));
+                        nspcombiner.combine(); // Run the combining process
+                        return null;
+                    }
+
+                    @Override
+                    protected void succeeded() {
+                        progressBar.setProgress(1.0); // Set progress to 100% when done
+                        Alert alert = new Alert(AlertType.INFORMATION);
+                        alert.setTitle("Success");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Combining completed.");
+                        alert.showAndWait();
+                    }
+
+                    @Override
+                    protected void failed() {
+                        Throwable exception = getException();
+                        // Handle failure
+                        Alert alert = new Alert(AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Combining failed");
+                        alert.setContentText(exception.getMessage());
+                        alert.showAndWait();
+                    }
+                };
+
+                // Run the task in a new thread
+                new Thread(combineTask).start();
             }
         });
 
