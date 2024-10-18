@@ -51,6 +51,7 @@ public class GUIMaker {
 
         // Initialize the label to show the selected file path
         filePathLabel = new Label("No file selected.");
+        filePathLabel.setTextFill(Color.WHITE);
         mainFrame.add(filePathLabel, 1, 0); // Add the label to the grid
 
         // Add selection button for selecting a directory
@@ -58,6 +59,7 @@ public class GUIMaker {
 
         // Initialize the label to show the selected directory path
         directoryPathLabel = new Label("No directory selected.");
+        directoryPathLabel.setTextFill(Color.WHITE);
         mainFrame.add(directoryPathLabel, 1, 1); // Add the label to the grid
 
         ProgressBar progressBar = new ProgressBar(0);
